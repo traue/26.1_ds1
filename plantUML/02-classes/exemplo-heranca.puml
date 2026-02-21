@@ -1,0 +1,89 @@
+@startuml exemplo-heranca
+
+' ============================================
+' DIAGRAMA DE CLASSES - Herança e Interfaces
+' ============================================
+' Demonstra: herança, classes abstratas,
+' interfaces, enums e composição.
+' Referência: https://plantuml.com/class-diagram
+' ============================================
+
+title Herança e Interfaces - Sistema de Pagamentos
+
+' --- Enumeração ---
+enum StatusPagamento {
+    PENDENTE
+    APROVADO
+    RECUSADO
+    CANCELADO
+}
+
+' --- Interface ---
+interface Pagavel <<interface>> {
+    + calcularTotal() : double
+    + aplicarDesconto(percentual: double) : double
+}
+
+' --- Classe Abstrata ---
+abstract class FormaPagamento {
+    # id : int
+    # valor : double
+    # status : StatusPagamento
+    + {abstract} processar() : boolean
+    + cancelar() : boolean
+    + getStatus() : StatusPagamento
+}
+
+' --- Classes Concretas ---
+class CartaoCredito extends FormaPagamento {
+    - numero : String
+    - bandeira : String
+    - cvv : String
+    - validade : Date
+    + processar() : boolean
+    + estornar() : boolean
+}
+
+class Pix extends FormaPagamento {
+    - chave : String
+    - txid : String
+    + processar() : boolean
+    + gerarQRCode() : String
+}
+
+class Boleto extends FormaPagamento {
+    - codigoBarras : String
+    - dataVencimento : Date
+    + processar() : boolean
+    + gerarPDF() : byte[]
+}
+
+' --- Classe que usa a interface ---
+class Pedido implements Pagavel {
+    - id : int
+    - itens : List<ItemPedido>
+    - formaPagamento : FormaPagamento
+    + calcularTotal() : double
+    + aplicarDesconto(percentual: double) : double
+    + finalizar() : boolean
+}
+
+class ItemPedido {
+    - produto : String
+    - quantidade : int
+    - precoUnitario : double
+    + getSubtotal() : double
+}
+
+' --- Relacionamentos ---
+Pedido *-- "1..*" ItemPedido : contém
+Pedido --> "1" FormaPagamento : usa
+FormaPagamento --> StatusPagamento : possui
+
+note bottom of FormaPagamento
+    Classe abstrata:
+    não pode ser instanciada diretamente.
+    As subclasses implementam processar().
+end note
+
+@enduml

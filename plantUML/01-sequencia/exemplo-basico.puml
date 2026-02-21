@@ -1,0 +1,30 @@
+@startuml exemplo-basico
+
+' ============================================
+' DIAGRAMA DE SEQUÊNCIA - Exemplo Básico
+' ============================================
+' Referência: https://plantuml.com/sequence-diagram
+'
+' Diagramas de sequência mostram a interação
+' entre objetos ao longo do tempo.
+' ============================================
+
+title Exemplo Básico - Pedido em Restaurante
+
+actor Cliente
+participant Garçom
+participant Cozinha
+
+Cliente -> Garçom : Faz pedido
+activate Garçom
+
+Garçom -> Cozinha : Envia pedido
+activate Cozinha
+
+Cozinha --> Garçom : Pedido pronto
+deactivate Cozinha
+
+Garçom --> Cliente : Entrega pedido
+deactivate Garçom
+
+@enduml

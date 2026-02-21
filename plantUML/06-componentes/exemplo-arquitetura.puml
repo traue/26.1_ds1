@@ -1,0 +1,81 @@
+@startuml exemplo-arquitetura
+
+' ============================================
+' DIAGRAMA DE COMPONENTES
+' ============================================
+' Referência: https://plantuml.com/component-diagram
+'
+' Diagramas de componente mostram a organização
+' e dependências entre componentes de software.
+' ============================================
+
+title Arquitetura de Microsserviços - E-Commerce
+
+skinparam component {
+    BackgroundColor<<external>> LightBlue
+    BackgroundColor<<service>> LightYellow
+    BackgroundColor<<database>> LightGreen
+}
+
+' --- Camada de Apresentação ---
+package "Frontend" {
+    [App Web\n(React)] as web
+    [App Mobile\n(React Native)] as mobile
+}
+
+' --- API Gateway ---
+cloud "API Gateway" {
+    [Kong / Nginx] as gateway
+}
+
+' --- Microsserviços ---
+package "Microsserviços" {
+    [Auth Service] <<service>> as auth
+    [Catálogo Service] <<service>> as catalogo
+    [Carrinho Service] <<service>> as carrinho
+    [Pedido Service] <<service>> as pedido
+    [Pagamento Service] <<service>> as pagamento
+    [Notificação Service] <<service>> as notificacao
+}
+
+' --- Bancos de Dados ---
+package "Persistência" {
+    database "PostgreSQL\n(Usuários)" <<database>> as dbAuth
+    database "MongoDB\n(Catálogo)" <<database>> as dbCatalogo
+    database "Redis\n(Carrinho/Cache)" <<database>> as dbCarrinho
+    database "PostgreSQL\n(Pedidos)" <<database>> as dbPedido
+}
+
+' --- Serviços Externos ---
+package "Serviços Externos" {
+    [Gateway de\nPagamento] <<external>> as extPagamento
+    [Serviço de\nE-mail (SMTP)] <<external>> as extEmail
+    [Serviço de\nSMS] <<external>> as extSMS
+}
+
+' --- Message Broker ---
+queue "RabbitMQ" as mq
+
+' --- Conexões ---
+web --> gateway
+mobile --> gateway
+
+gateway --> auth
+gateway --> catalogo
+gateway --> carrinho
+gateway --> pedido
+
+auth --> dbAuth
+catalogo --> dbCatalogo
+carrinho --> dbCarrinho
+pedido --> dbPedido
+
+pedido --> mq : Publica evento
+mq --> pagamento : Consome evento
+mq --> notificacao : Consome evento
+
+pagamento --> extPagamento
+notificacao --> extEmail
+notificacao --> extSMS
+
+@enduml

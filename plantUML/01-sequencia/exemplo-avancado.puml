@@ -1,0 +1,76 @@
+@startuml exemplo-avancado
+
+' ============================================
+' DIAGRAMA DE SEQUÊNCIA - Exemplo Avançado
+' ============================================
+' Demonstra: loops, condicionais (alt/else),
+' notas, agrupamentos e mensagens assíncronas.
+' Referência: https://plantuml.com/sequence-diagram
+' ============================================
+
+title Login e Navegação em Sistema Web
+
+actor       Usuario    as U
+participant "Frontend\n(React)"  as FE
+participant "API\nGateway"       as API
+participant "Auth\nService"      as AUTH
+database    "Banco de\nDados"    as DB
+
+== Autenticação ==
+
+U -> FE : Acessa o sistema
+activate FE
+
+FE -> API : POST /login (email, senha)
+activate API
+
+API -> AUTH : Valida credenciais
+activate AUTH
+
+AUTH -> DB : SELECT usuario WHERE email = ?
+activate DB
+DB --> AUTH : Dados do usuário
+deactivate DB
+
+alt #LightGreen Credenciais válidas
+    AUTH --> API : Token JWT
+    API --> FE : 200 OK + Token
+    FE --> U : Redireciona ao Dashboard
+
+    note right of FE
+        O token JWT é armazenado
+        no localStorage ou cookie
+    end note
+
+else #LightCoral Credenciais inválidas
+    AUTH --> API : Erro de autenticação
+    API --> FE : 401 Unauthorized
+    FE --> U : Exibe mensagem de erro
+end
+
+deactivate AUTH
+deactivate API
+
+== Navegação (após login) ==
+
+loop Para cada página acessada
+    U -> FE : Navega para /dashboard
+    FE -> API : GET /dados (Header: Bearer token)
+    activate API
+
+    API -> AUTH : Valida token
+    AUTH --> API : Token válido
+
+    API -> DB : Consulta dados
+    activate DB
+    DB --> API : Resultados
+    deactivate DB
+
+    API --> FE : 200 OK + JSON
+    deactivate API
+    FE --> U : Renderiza página
+end
+
+deactivate FE
+
+@enduml

@@ -1,0 +1,73 @@
+@startuml exemplo-fluxo
+
+' ============================================
+' DIAGRAMA DE ATIVIDADE
+' ============================================
+' Referência: https://plantuml.com/activity-diagram-beta
+'
+' Diagramas de atividade representam fluxos
+' de trabalho ou algoritmos, incluindo
+' decisões, loops e paralelismo.
+' ============================================
+
+title Fluxo de Compra Online
+
+start
+
+:Cliente acessa o site;
+
+:Busca por produto;
+
+if (Produto encontrado?) then (sim)
+    :Visualiza detalhes do produto;
+
+    if (Produto em estoque?) then (sim)
+        :Adiciona ao carrinho;
+
+        while (Deseja continuar comprando?) is (sim)
+            :Busca mais produtos;
+            :Adiciona ao carrinho;
+        endwhile (não)
+
+        :Vai para o checkout;
+
+        if (Cliente logado?) then (sim)
+            :Seleciona endereço de entrega;
+        else (não)
+            :Faz login ou cadastro;
+            :Informa endereço de entrega;
+        endif
+
+        :Escolhe forma de pagamento;
+
+        ' --- Processamento paralelo ---
+        fork
+            :Processa pagamento;
+        fork again
+            :Reserva estoque;
+        fork again
+            :Calcula frete;
+        end fork
+
+        if (Pagamento aprovado?) then (sim)
+            #LightGreen:Pedido confirmado!;
+            :Envia e-mail de confirmação;
+            :Atualiza estoque;
+        else (não)
+            #LightCoral:Pagamento recusado;
+            :Notifica cliente;
+            :Libera estoque reservado;
+        endif
+
+    else (não)
+        :Exibe "Produto indisponível";
+        :Sugere produtos similares;
+    endif
+
+else (não)
+    :Exibe "Nenhum resultado encontrado";
+endif
+
+stop
+
+@enduml

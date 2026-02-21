@@ -1,0 +1,72 @@
+@startuml exemplo-sistema
+
+' ============================================
+' DIAGRAMA DE CASOS DE USO
+' ============================================
+' Referência: https://plantuml.com/use-case-diagram
+'
+' Diagramas de caso de uso mostram as
+' funcionalidades do sistema do ponto de
+' vista dos atores (usuários/sistemas externos).
+' ============================================
+
+title Casos de Uso - Sistema de E-Commerce
+
+left to right direction
+
+' --- Atores ---
+actor "Cliente" as cliente
+actor "Administrador" as admin
+actor "Sistema de\nPagamento" as pagamento
+
+' --- Pacote do Sistema ---
+rectangle "Sistema E-Commerce" {
+
+    ' --- Casos de Uso do Cliente ---
+    usecase "Cadastrar-se"           as UC1
+    usecase "Fazer Login"            as UC2
+    usecase "Buscar Produtos"        as UC3
+    usecase "Adicionar ao Carrinho"  as UC4
+    usecase "Finalizar Compra"       as UC5
+    usecase "Acompanhar Pedido"      as UC6
+    usecase "Avaliar Produto"        as UC7
+
+    ' --- Casos de Uso do Admin ---
+    usecase "Gerenciar Produtos"     as UC8
+    usecase "Gerenciar Pedidos"      as UC9
+    usecase "Gerar Relatórios"       as UC10
+}
+
+' --- Associações do Cliente ---
+cliente --> UC1
+cliente --> UC2
+cliente --> UC3
+cliente --> UC4
+cliente --> UC5
+cliente --> UC6
+cliente --> UC7
+
+' --- Associações do Admin ---
+admin --> UC2
+admin --> UC8
+admin --> UC9
+admin --> UC10
+
+' --- Associação com sistema externo ---
+UC5 --> pagamento : <<usa>>
+
+' --- Relacionamentos entre casos de uso ---
+' include = obrigatório | extend = opcional
+
+UC5 ..> UC2 : <<include>>
+UC4 ..> UC3 : <<extend>>
+UC7 ..> UC2 : <<include>>
+
+note right of UC5
+    Finalizar compra
+    exige login (include)
+    e aciona o sistema
+    de pagamento externo.
+end note
+
+@enduml

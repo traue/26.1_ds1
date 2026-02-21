@@ -1,0 +1,125 @@
+@startuml exemplo-banco
+
+' ============================================
+' DIAGRAMA ENTIDADE-RELACIONAMENTO (ER)
+' ============================================
+' Referência: https://plantuml.com/ie-diagram
+'
+' Diagramas ER mostram as entidades (tabelas)
+' de um banco de dados e os relacionamentos
+' entre elas, usando a notação "pé de galinha"
+' (crow's foot / Information Engineering).
+' ============================================
+
+title Modelo ER - Sistema de E-Commerce
+
+' ============================================
+' NOTAÇÃO DE CARDINALIDADE:
+'
+'  ||--||   Um para um (obrigatório)
+'  ||--o|   Um para zero ou um
+'  ||--|{   Um para muitos (obrigatório)
+'  ||--o{   Um para zero ou muitos
+'  }|--|{   Muitos para muitos
+' ============================================
+
+entity "Cliente" as cliente {
+    * **id** : INT <<PK>>
+    --
+    * nome : VARCHAR(100)
+    * email : VARCHAR(150) <<UNIQUE>>
+    * cpf : CHAR(11) <<UNIQUE>>
+    senha_hash : VARCHAR(255)
+    telefone : VARCHAR(20)
+    data_cadastro : TIMESTAMP
+}
+
+entity "Endereco" as endereco {
+    * **id** : INT <<PK>>
+    --
+    * cliente_id : INT <<FK>>
+    * logradouro : VARCHAR(200)
+    * numero : VARCHAR(10)
+    complemento : VARCHAR(50)
+    * bairro : VARCHAR(100)
+    * cidade : VARCHAR(100)
+    * uf : CHAR(2)
+    * cep : CHAR(8)
+    principal : BOOLEAN
+}
+
+entity "Pedido" as pedido {
+    * **id** : INT <<PK>>
+    --
+    * cliente_id : INT <<FK>>
+    * endereco_id : INT <<FK>>
+    * data_pedido : TIMESTAMP
+    * status : ENUM
+    * valor_total : DECIMAL(10,2)
+    valor_frete : DECIMAL(10,2)
+}
+
+entity "ItemPedido" as item_pedido {
+    * **id** : INT <<PK>>
+    --
+    * pedido_id : INT <<FK>>
+    * produto_id : INT <<FK>>
+    * quantidade : INT
+    * preco_unitario : DECIMAL(10,2)
+    desconto : DECIMAL(10,2)
+}
+
+entity "Produto" as produto {
+    * **id** : INT <<PK>>
+    --
+    * categoria_id : INT <<FK>>
+    * nome : VARCHAR(200)
+    descricao : TEXT
+    * preco : DECIMAL(10,2)
+    * estoque : INT
+    imagem_url : VARCHAR(500)
+    ativo : BOOLEAN
+}
+
+entity "Categoria" as categoria {
+    * **id** : INT <<PK>>
+    --
+    * nome : VARCHAR(100)
+    descricao : TEXT
+    categoria_pai_id : INT <<FK>>
+}
+
+entity "Pagamento" as pagamento {
+    * **id** : INT <<PK>>
+    --
+    * pedido_id : INT <<FK>>
+    * forma : ENUM
+    * valor : DECIMAL(10,2)
+    * status : ENUM
+    transacao_id : VARCHAR(100)
+    data_pagamento : TIMESTAMP
+}
+
+entity "Avaliacao" as avaliacao {
+    * **id** : INT <<PK>>
+    --
+    * cliente_id : INT <<FK>>
+    * produto_id : INT <<FK>>
+    * nota : INT
+    comentario : TEXT
+    data_avaliacao : TIMESTAMP
+}
+
+' --- Relacionamentos ---
+cliente     ||--o{  endereco    : "possui"
+cliente     ||--o{  pedido      : "realiza"
+cliente     ||--o{  avaliacao   : "escreve"
+pedido      ||--|{  item_pedido : "contém"
+pedido      ||--o|  pagamento   : "possui"
+pedido      }|--||  endereco    : "entrega em"
+produto     ||--o{  item_pedido : "está em"
+produto     ||--o{  avaliacao   : "recebe"
+categoria   ||--o{  produto     : "agrupa"
+categoria   ||--o{  categoria   : "subcategoria"
+
+@enduml

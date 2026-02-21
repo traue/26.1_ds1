@@ -1,0 +1,72 @@
+@startuml exemplo-pedido
+
+' ============================================
+' DIAGRAMA DE ESTADOS (State Machine)
+' ============================================
+' Referência: https://plantuml.com/state-diagram
+'
+' Diagramas de estado mostram os diferentes
+' estados de um objeto e as transições
+' possíveis entre esses estados.
+' ============================================
+
+title Ciclo de Vida de um Pedido
+
+[*] --> Criado : Cliente finaliza compra
+
+state Criado {
+    [*] --> AguardandoPagamento
+    AguardandoPagamento : Pedido criado, aguardando\nconfirmação de pagamento
+}
+
+Criado --> PagamentoConfirmado : Pagamento aprovado
+Criado --> Cancelado : Timeout (30 min)\nou cliente cancela
+
+state PagamentoConfirmado {
+    [*] --> EmSeparacao
+    EmSeparacao : Equipe separando\nos itens do pedido
+    EmSeparacao --> Embalado : Itens separados
+    Embalado : Pedido embalado\ne pronto para envio
+}
+
+PagamentoConfirmado --> EmTransporte : Entregue à transportadora
+
+state EmTransporte {
+    [*] --> EmRota
+    EmRota : Pedido a caminho\ndo destino
+    EmRota --> SaiuParaEntrega : Chegou na região
+    SaiuParaEntrega : Entregador a caminho\ndo endereço
+}
+
+EmTransporte --> Entregue : Entrega confirmada
+EmTransporte --> TentativaFalha : Destinatário ausente
+
+TentativaFalha --> EmTransporte : Nova tentativa
+TentativaFalha --> Devolvido : 3 tentativas falharam
+
+Entregue --> [*]
+
+state Cancelado #LightCoral {
+    Cancelado : Pedido cancelado.\nEstoque liberado.\nReembolso processado.
+}
+
+state Devolvido #Orange {
+    Devolvido : Pedido devolvido\nao centro de distribuição.\nReembolso em processamento.
+}
+
+Cancelado --> [*]
+Devolvido --> [*]
+
+note right of PagamentoConfirmado
+    Após confirmação do pagamento,
+    o pedido entra no fluxo de
+    separação e embalagem.
+end note
+
+note left of TentativaFalha
+    Máximo de 3 tentativas
+    de entrega antes de
+    devolver o pedido.
+end note
+
+@enduml

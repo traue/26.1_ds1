@@ -1,0 +1,54 @@
+@startuml exemplo-basico
+
+' ============================================
+' DIAGRAMA DE CLASSES - Exemplo Básico
+' ============================================
+' Referência: https://plantuml.com/class-diagram
+'
+' Diagramas de classe mostram a estrutura
+' estática do sistema: classes, atributos,
+' métodos e relacionamentos.
+' ============================================
+
+title Exemplo Básico - Sistema de Biblioteca
+
+class Livro {
+    - id : int
+    - titulo : String
+    - isbn : String
+    - anoPublicacao : int
+    + getTitulo() : String
+    + getIsbn() : String
+}
+
+class Autor {
+    - id : int
+    - nome : String
+    - nacionalidade : String
+    + getNome() : String
+}
+
+class Biblioteca {
+    - nome : String
+    - endereco : String
+    + adicionarLivro(livro: Livro) : void
+    + buscarPorTitulo(titulo: String) : Livro[]
+    + listarTodos() : Livro[]
+}
+
+' ============================================
+' RELACIONAMENTOS:
+'
+'   A -- B     Associação
+'   A --> B    Associação direcionada
+'   A --o B    Agregação
+'   A --* B    Composição
+'   A --|> B   Herança (generalização)
+'   A ..|> B   Implementação (interface)
+'   A ..> B    Dependência
+' ============================================
+
+Autor "1" -- "1..*" Livro : escreve >
+Biblioteca "1" o-- "0..*" Livro : possui >
+
+@enduml
